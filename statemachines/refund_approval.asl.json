@@ -1,0 +1,43 @@
+{
+  "Comment": "返金承認ワークフロー (Standard / callback): タスクトークンを SQS に送り、エージェントの判断を待つ",
+  "QueryLanguage": "JSONata",
+  "StartAt": "RequestAgentReview",
+  "States": {
+    "RequestAgentReview": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sqs:sendMessage.waitForTaskToken",
+      "Arguments": {
+        "QueueUrl": "${QueueUrl}",
+        "MessageBody": {
+          "taskToken": "{% $states.context.Task.Token %}",
+          "executionArn": "{% $states.context.Execution.Id %}",
+          "request": "{% $states.input %}"
+        }
+      },
+      "HeartbeatSeconds": 120,
+      "TimeoutSeconds": 3600,
+      "Output": "{% $merge([$states.input, {'review': $states.result}]) %}",
+      "Next": "IsApproved"
+    },
+    "IsApproved": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Condition": "{% $states.input.review.approved = true %}",
+          "Next": "IssueCredit"
+        }
+      ],
+      "Default": "RefundDenied"
+    },
+    "IssueCredit": {
+      "Type": "Pass",
+      "Output": "{% {'orderId': $states.input.orderId, 'refunded': $states.input.amount, 'comment': $states.input.review.comment} %}",
+      "End": true
+    },
+    "RefundDenied": {
+      "Type": "Fail",
+      "Error": "RefundDenied",
+      "Cause": "The reviewer did not approve the refund"
+    }
+  }
+}

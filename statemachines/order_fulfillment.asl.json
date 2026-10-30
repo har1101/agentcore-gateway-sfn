@@ -1,0 +1,37 @@
+{
+  "Comment": "注文処理ワークフロー (Standard): 金額チェック → 在庫引当 → 出荷待ち → 出荷",
+  "QueryLanguage": "JSONata",
+  "StartAt": "ValidateOrder",
+  "States": {
+    "ValidateOrder": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Condition": "{% $states.input.amount > 100000 %}",
+          "Next": "RejectOrder"
+        }
+      ],
+      "Default": "ReserveInventory"
+    },
+    "RejectOrder": {
+      "Type": "Fail",
+      "Error": "AmountLimitExceeded",
+      "Cause": "Order amount exceeds the limit of 100000 JPY"
+    },
+    "ReserveInventory": {
+      "Type": "Pass",
+      "Output": "{% $merge([$states.input, {'inventoryReserved': true}]) %}",
+      "Next": "WaitForShipment"
+    },
+    "WaitForShipment": {
+      "Type": "Wait",
+      "Seconds": "{% $exists($states.input.waitSeconds) ? $states.input.waitSeconds : 5 %}",
+      "Next": "Ship"
+    },
+    "Ship": {
+      "Type": "Pass",
+      "Output": "{% {'orderId': $states.input.orderId, 'status': 'SHIPPED', 'trackingNumber': 'TRK-' & $states.input.orderId} %}",
+      "End": true
+    }
+  }
+}

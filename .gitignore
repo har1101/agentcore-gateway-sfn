@@ -1,0 +1,12 @@
+# Python / uv
+.venv/
+__pycache__/
+
+# Account-specific output (account IDs, ARNs, task tokens, console screenshots)
+config.json
+results/
+screenshots/
+
+# yomiyasu records and material excerpts (contain full drafts and command output)
+.yomiyasu/
+*.material.txt

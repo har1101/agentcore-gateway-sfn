@@ -1,0 +1,12 @@
+{
+  "Comment": "Gateway のサービスロールでは許可していないワークフロー (IAM 境界の検証用)",
+  "QueryLanguage": "JSONata",
+  "StartAt": "LongWait",
+  "States": {
+    "LongWait": {
+      "Type": "Wait",
+      "Seconds": 600,
+      "End": true
+    }
+  }
+}

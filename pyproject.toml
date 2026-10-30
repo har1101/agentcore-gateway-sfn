@@ -1,0 +1,10 @@
+[project]
+name = "agentcore-gateway-sfn"
+version = "0.1.0"
+requires-python = ">=3.13"
+dependencies = [
+    "boto3[crt]>=1.43.122",
+    "httpx>=0.28.1",
+    "mcp>=2.1.1",
+    "strands-agents>=1.62.0",
+]

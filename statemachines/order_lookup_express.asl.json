@@ -1,0 +1,12 @@
+{
+  "Comment": "注文ステータス照会 (Express): StartSyncExecution で同期的に結果を返す",
+  "QueryLanguage": "JSONata",
+  "StartAt": "LookupOrder",
+  "States": {
+    "LookupOrder": {
+      "Type": "Pass",
+      "Output": "{% ( $db := {'1001': 'SHIPPED', '1002': 'PROCESSING', '1003': 'CANCELLED'}; $s := $lookup($db, $string($states.input.orderId)); {'orderId': $states.input.orderId, 'status': $exists($s) ? $s : 'NOT_FOUND'} ) %}",
+      "End": true
+    }
+  }
+}
